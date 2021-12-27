@@ -9,14 +9,14 @@
 
 (defn slice
   "Slice a sequence."
-  [s start width]
+  [s start num]
   (->> s
        (drop start)
-       (take width)))
+       (take num)))
 
 
 (defn shear
   "Shear a two-dimensional sequence, returning a smaller one."
-  [s x y w h]
-  (map #(slice % x w)
-       (slice s y h)))
+  [s col row width height]
+  (map #(slice % col width)
+       (slice s row height)))

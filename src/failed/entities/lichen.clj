@@ -18,7 +18,7 @@
   [lichen]
   (and
     (not (:grown? lichen))
-    (< (rand) 0.1)))
+    (< (rand) 0.05)))
 
 
 (defn grow

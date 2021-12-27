@@ -55,22 +55,29 @@
     [start-x start-y]))
 
 
-(defn get-viewport-coords-of
+(defn viewport-coords-of
   "Get the viewport coordinates for the given coords adjusted to the origin"
   [origin coords]
   (map - coords origin))
 
 
+(defn in-viewport?
+  [vcols vrows x y]
+  (and (< x vcols) (< y vrows)))
+
+
 (defn draw-entity
-  [screen origin entity]
-  (let [[x y] (get-viewport-coords-of origin (:location entity))]
-    (s/put-string screen x y (:glyph entity) {:fg (:color entity)})))
+  [screen origin vrows vcols entity]
+  (let [[x y] (viewport-coords-of origin (:location entity))]
+    (when (in-viewport? vcols vrows x y)
+      (s/put-string screen x y (:glyph entity) {:fg (:color entity)}))))
 
 
 (defn highlight-player
-  [screen origin player]
-  (let [[x y] (get-viewport-coords-of origin (:location player))]
-    (s/move-cursor screen x y)))
+  [screen origin vrows vcols player]
+  (let [[x y] (viewport-coords-of origin (:location player))]
+    (when (in-viewport? vcols vrows x y)
+      (s/move-cursor screen x y))))
 
 
 (defn draw-world
@@ -83,29 +90,34 @@
       (s/put-sheet screen 0 0 sheet))))
 
 
+(defn draw-log
+  [screen game row col]
+  (let [{:keys [entries size]} (:log game)]
+    (s/put-sheet screen col row (take-last size entries))))
+
+
 (defn draw-hud
-  [screen game [ox oy]]
-  (let [hud-row (dec (second (s/get-size screen)))
-        [x y] (get-in game [:world :entities :player :location])
-        info (str "loc: [" x "-" y "]")
-        info (str info " viewport origin: [" ox "-" oy "]")]
-    (s/put-string screen 0 hud-row info)))
+  [screen game]
+  (let [log-row (- (second (s/get-size screen))
+                   (-> game :log :size))
+        log-col 0]
+    (draw-log screen game log-row log-col)))
 
 
-(defmethod draw-ui :play [ui game screen]
-  (let [world (:world game)
-        tiles (:tiles world)
-        entities (:entities world)
-        player (:player entities)
+(defmethod draw-ui :play [_ui game screen]
+  (let [world       (:world game)
+        tiles       (:tiles world)
+        entities    (:entities world)
+        player      (:player entities)
         [cols rows] (s/get-size screen)
-        vcols cols
-        vrows (dec rows)
-        origin (get-viewport-coords game (:location player) vcols vrows)]
+        vcols       cols
+        vrows       (- rows (-> game :log :size))
+        origin      (get-viewport-coords game (:location player) vcols vrows)]
     (draw-world screen vrows vcols origin tiles)
     (doseq [entity (vals entities)]
-      (draw-entity screen origin entity))
-    (draw-hud screen game origin)
-    (highlight-player screen origin player)))
+      (draw-entity screen origin vrows vcols entity))
+    (draw-hud screen game)
+    (highlight-player screen origin vrows vcols player)))
 
 
 (defn draw-game

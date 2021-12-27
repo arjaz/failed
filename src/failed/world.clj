@@ -136,7 +136,7 @@
 (defn find-empty-tile
   [world]
   (loop [coord (random-coordinate)]
-    (if (= :floor (get-tile-kind world coord))
+    (if (empty-tile? world coord)
       coord
       (recur (random-coordinate)))))
 

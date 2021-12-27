@@ -12,7 +12,7 @@
 
 
 (defrecord Game
-  [world uis input])
+  [world uis input log])
 
 
 (defn tick-entity
@@ -43,7 +43,7 @@
 
 (defn new-game
   []
-  (->Game nil [(->UI :start)] nil))
+  (->Game nil [(->UI :start)] nil {:entries [] :size 4}))
 
 
 (defn main

@@ -32,7 +32,7 @@
   Entity
   (tick [this world]
     (if-let [target (find-empty-neighbor world (:location this))]
-      (move this world target)
+      (move this target world)
       world)))
 
 
