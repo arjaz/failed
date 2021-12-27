@@ -1,11 +1,13 @@
-(ns failed.world)
+(ns failed.world
+  (:require
+    [failed.coords :refer [neighbors]]))
 
 
 (def world-size [160 50])
 
 
 (defrecord World
-  [tiles])
+  [tiles entities])
 
 
 (defrecord Tile
@@ -86,7 +88,7 @@
 
 (defn random-world
   []
-  (let [world (->World (random-tiles))
+  (let [world (->World (random-tiles) {})
         world (nth (iterate smooth-world world) 3)]
     world))
 
@@ -111,9 +113,35 @@
   (set-tile world coord (:floor tiles)))
 
 
+(defn get-entity-at
+  [world coord]
+  (first (filter #(= coord (:location %))
+                 (vals (:entities world)))))
+
+
+(defn empty-tile?
+  [world coord]
+  (and (= :floor (get-tile-kind world coord))
+       (not (get-entity-at world coord))))
+
+
+(defn find-empty-neighbor
+  [world coord]
+  (some->> (neighbors coord)
+           (filter #(empty-tile? world %))
+           seq
+           rand-nth))
+
+
 (defn find-empty-tile
   [world]
   (loop [coord (random-coordinate)]
     (if (= :floor (get-tile-kind world coord))
       coord
       (recur (random-coordinate)))))
+
+
+(defn check-tile
+  "Check that the given tile at the destination passes the given predicate."
+  [world dest pred]
+  (pred (get-tile-kind world dest)))

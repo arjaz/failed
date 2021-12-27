@@ -1,5 +1,6 @@
 (ns failed.core
   (:require
+    [failed.entities.core :refer [tick]]
     [failed.ui.core :refer [->UI]]
     [failed.ui.drawing :refer [draw-game]]
     [failed.ui.input :refer [get-input process-input]]
@@ -14,13 +15,24 @@
   [world uis input])
 
 
+(defn tick-entity
+  [world entity]
+  (tick entity world))
+
+
+(defn tick-world
+  [world]
+  (reduce tick-entity world (vals (:entities world))))
+
+
 (defn run-game
   [game screen]
   (loop [{:keys [input uis] :as game} game]
-    (when-not (empty? uis)
-      (draw-game game screen)
+    (when (seq uis)
       (if (nil? input)
-        (recur (get-input game screen))
+        (let [game (update game :world tick-world)]
+          (draw-game game screen)
+          (recur (get-input game screen)))
         (recur (process-input (dissoc game :input) input))))))
 
 
@@ -31,11 +43,11 @@
 
 (defn new-game
   []
-  (assoc (->Game nil [(->UI :start)] nil)
-         :location [40 20]))
+  (->Game nil [(->UI :start)] nil))
 
 
 (defn main
+  ([] (main :swing false))
   ([screen-type] (main screen-type false))
   ([screen-type block?]
    (letfn [(go

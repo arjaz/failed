@@ -4,9 +4,9 @@
 (defprotocol Digger
 
   (dig
-    [this world dest]
+    [this dest world]
     "Dig a location")
 
   (can-dig?
-    [this world dest]
+    [this dest world]
     "Can the entity dig that destination"))

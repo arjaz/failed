@@ -1,8 +1,10 @@
 (ns failed.ui.input
   (:require
+    [failed.entities.bunny :refer [make-bunny]]
+    [failed.entities.lichen :refer [make-lichen]]
     [failed.entities.player :refer [make-player move-player]]
     [failed.ui.core :refer [->UI]]
-    [failed.world :refer [random-world smooth-world]]
+    [failed.world :refer [random-world smooth-world find-empty-tile]]
     [lanterna.screen :as s]))
 
 
@@ -11,22 +13,38 @@
     (-> game :uis last :kind)))
 
 
+(defn add-creature
+  [world make-creature]
+  (let [creature (make-creature (find-empty-tile world))]
+    (assoc-in world [:entities (:id creature)] creature)))
+
+
+(defn add-creatures
+  [world make-creature n]
+  (nth (iterate #(add-creature % make-creature) world)
+       n))
+
+
+(defn populate-world
+  [world]
+  (let [world (assoc-in world [:entities :player]
+                        (make-player (find-empty-tile world)))]
+    (-> world
+        (add-creatures make-lichen 30)
+        (add-creatures make-bunny 20))))
+
+
 (defn reset-game
   [game]
   (let [fresh-world (random-world)]
     (-> game
         (assoc :world fresh-world)
-        (assoc-in [:world :player] (make-player fresh-world))
+        (update :world populate-world)
         (assoc :uis [(->UI :play)]))))
 
 
 (defmethod process-input :start [game input]
   (reset-game game))
-
-
-(defn move
-  [[x y] [dx dy]]
-  [(+ x dx) (+ y dy)])
 
 
 (defmethod process-input :play [game input]
@@ -35,8 +53,6 @@
     :enter  (assoc game :uis [(->UI :win)])
     :escape (assoc game :uis [(->UI :lose)])
     \q      (assoc game :uis [])
-
-    \s (assoc game :world (smooth-world (:world game)))
 
     :up    (update game :world move-player :n)
     :left  (update game :world move-player :w)
