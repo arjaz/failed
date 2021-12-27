@@ -1,4 +1,5 @@
 (ns failed.core
+  (:gen-class)
   (:require
     [failed.entities.core :refer [tick]]
     [failed.ui.core :refer [->UI]]
