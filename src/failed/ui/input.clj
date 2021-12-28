@@ -1,7 +1,7 @@
 (ns failed.ui.input
   (:require
     [failed.entities.bunny :refer [make-bunny]]
-    [failed.entities.lichen :refer [make-lichen]]
+    [failed.entities.fungus :refer [make-fungus]]
     [failed.entities.player :refer [make-player move-player]]
     [failed.keymap :refer [read-keymap with-help]]
     [failed.log :refer [with-log]]
@@ -32,7 +32,7 @@
   (let [world (assoc-in world [:entities :player]
                         (make-player (find-empty-tile world)))]
     (-> world
-        (add-creatures make-lichen 30)
+        (add-creatures make-fungus 30)
         (add-creatures make-bunny 20))))
 
 

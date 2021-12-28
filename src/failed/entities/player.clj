@@ -4,6 +4,7 @@
     [failed.components.destructible :refer [Destructible take-damage]]
     [failed.components.digger :refer [Digger dig can-dig?]]
     [failed.components.mobile :refer [Mobile move can-move?]]
+    [failed.components.named :refer [Named]]
     [failed.coords :refer [destination-coords]]
     [failed.entities.core :refer [Entity]]
     [failed.world :refer [get-entity-at empty-tile? get-tile-kind set-tile-floor]]))
@@ -49,6 +50,12 @@
     {:pre [(satisfies? Destructible target)]}
     (let [damage 1]
       (take-damage target damage world))))
+
+
+(extend-type Player
+  Named
+  (ask-name [this]
+    "Player"))
 
 
 (defn make-player
