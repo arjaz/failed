@@ -13,7 +13,17 @@
 
 
 (defrecord Game
-  [world uis input log])
+  [world uis input hud log])
+
+
+(defn new-game
+  []
+  (map->Game {:world nil
+              :uis   [(->UI :start)]
+              :input nil
+              :hud   {:height 4}
+              :log   {:entries  []
+                      :max-size 32}}))
 
 
 (defn tick-entity
@@ -40,11 +50,6 @@
 (comment
   (main :swing)
   )
-
-
-(defn new-game
-  []
-  (->Game nil [(->UI :start)] nil {:entries [] :size 4}))
 
 
 (defn main

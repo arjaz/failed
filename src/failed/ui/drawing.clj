@@ -91,17 +91,18 @@
 
 
 (defn draw-log
-  [screen game row col]
-  (let [{:keys [entries size]} (:log game)]
+  [screen game row col size]
+  (let [{:keys [entries]} (:log game)]
     (s/put-sheet screen col row (take-last size entries))))
 
 
 (defn draw-hud
   [screen game]
-  (let [log-row (- (second (s/get-size screen))
-                   (-> game :log :size))
+  (let [log-size (-> game :hud :height)
+        log-row (- (second (s/get-size screen))
+                   log-size)
         log-col 0]
-    (draw-log screen game log-row log-col)))
+    (draw-log screen game log-row log-col log-size)))
 
 
 (defmethod draw-ui :play [_ui game screen]
@@ -111,7 +112,7 @@
         player      (:player entities)
         [cols rows] (s/get-size screen)
         vcols       cols
-        vrows       (- rows (-> game :log :size))
+        vrows       (- rows (-> game :hud :height))
         origin      (get-viewport-coords game (:location player) vcols vrows)]
     (draw-world screen vrows vcols origin tiles)
     (doseq [entity (vals entities)]

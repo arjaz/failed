@@ -3,6 +3,7 @@
     [failed.entities.bunny :refer [make-bunny]]
     [failed.entities.lichen :refer [make-lichen]]
     [failed.entities.player :refer [make-player move-player]]
+    [failed.log :refer [log-event-after]]
     [failed.ui.core :refer [->UI]]
     [failed.world :refer [random-world find-empty-tile]]
     [lanterna.screen :as s]))
@@ -48,11 +49,6 @@
   (reset-game game))
 
 
-(defn log-event
-  [game msg]
-  (update-in game [:log :entries] conj msg))
-
-
 (defn read-keymap
   [keymap input]
   (get keymap input identity))
@@ -62,16 +58,14 @@
   {:enter  (fn [game] (assoc game :uis [(->UI :win)]))
    :escape (fn [game] (assoc game :uis [(->UI :lose)]))
    \q      (fn [game] (assoc game :uis []))
-   :up     (fn [game]
-             (-> game
-                 (update :world move-player :n)
-                 (log-event "Moved north")))
-   :left   (fn [game]
-             (-> game
-                 (update :world move-player :w)
-                 (log-event "Moved west")))
-   :right  (fn [game] (update game :world move-player :e))
-   :down   (fn [game] (update game :world move-player :s))})
+   :up     (log-event-after (fn [game] (update game :world move-player :n))
+                            "Moved north")
+   :left   (log-event-after (fn [game] (update game :world move-player :w))
+                            "Moved west")
+   :right  (log-event-after (fn [game] (update game :world move-player :e))
+                            "Moved east")
+   :down   (log-event-after (fn [game] (update game :world move-player :s))
+                            "Moved south")})
 
 
 (defmethod process-input :play [game input]
