@@ -13,17 +13,19 @@
 
 
 (defrecord Game
-  [world uis input hud log])
+  [world uis input hud log pause?])
 
 
 (defn new-game
   []
-  (map->Game {:world nil
-              :uis   [(->UI :start)]
-              :input nil
-              :hud   {:height 4}
-              :log   {:entries  []
-                      :max-size 32}}))
+  (map->Game {:world  nil
+              ;; TODO: keymap
+              :uis    [(->UI :start nil)]
+              :input  nil
+              :pause? nil
+              :hud    {:height 4}
+              :log    {:entries  []
+                       :max-size 32}}))
 
 
 (defn tick-entity
@@ -32,8 +34,10 @@
 
 
 (defn tick-world
-  [world]
-  (reduce tick-entity world (vals (:entities world))))
+  [world pause?]
+  (if-not pause?
+    (reduce tick-entity world (vals (:entities world)))
+    world))
 
 
 (defn run-game
@@ -41,7 +45,9 @@
   (loop [{:keys [input uis] :as game} game]
     (when (seq uis)
       (if (nil? input)
-        (let [game (update game :world tick-world)]
+        (let [game (-> game
+                       (update :world tick-world (:pause? game))
+                       (dissoc :pause?))]
           (draw-game game screen)
           (recur (get-input game screen)))
         (recur (process-input (dissoc game :input) input))))))

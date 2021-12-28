@@ -2,4 +2,4 @@
 
 
 (defrecord UI
-  [kind])
+  [kind keymap])

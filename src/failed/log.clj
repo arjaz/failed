@@ -14,7 +14,7 @@
   (update-in game [:log :entries] conj-log msg (-> game :log :max-size)))
 
 
-(defn log-event-after
-  [game-fn msg]
+(defn with-log
+  [msg game-fn]
   (fn [game]
     (-> game game-fn (log-event msg))))

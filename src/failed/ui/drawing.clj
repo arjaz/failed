@@ -1,5 +1,6 @@
 (ns failed.ui.drawing
   (:require
+    [failed.keymap :refer [keymap-help]]
     [failed.utils :refer [map2d shear]]
     [lanterna.screen :as s]))
 
@@ -102,7 +103,7 @@
         log-row (- (second (s/get-size screen))
                    log-size)
         log-col 0]
-    (draw-log screen game log-row log-col log-size)))
+    #_(draw-log screen game log-row log-col log-size)))
 
 
 (defmethod draw-ui :play [_ui game screen]
@@ -119,6 +120,46 @@
       (draw-entity screen origin vrows vcols entity))
     (draw-hud screen game)
     (highlight-player screen origin vrows vcols player)))
+
+
+;; TODO: padding
+(defn filler-sheet
+  [sheet]
+  (let [sheet-width  (count (last (sort-by count sheet)))
+        sheet-height (count sheet)]
+    (repeat sheet-height (apply str (repeat sheet-width " ")))))
+
+
+(defn draw-keymap-help
+  [screen keymap]
+  ;; TODO: extract out and make it columnar
+  (letfn [(key->msg [key] (if (keyword? key) (name key) key))
+          (kv-pair->msg [[key msg]] (str (key->msg key) ": " (or msg "<No help>") " "))]
+    (let [keymap     (keymap-help keymap)
+          help-sheet (sort (map kv-pair->msg keymap))
+          filler     (filler-sheet help-sheet)]
+      (s/put-sheet screen 0 0 filler)
+      (s/put-sheet screen 0 0 help-sheet))))
+
+
+(defmethod draw-ui :keymap-help [_ui game screen]
+  (when-let [target-ui (last (butlast (:uis game)))]
+    (when-let [keymap (:keymap target-ui)]
+      (draw-keymap-help screen keymap))))
+
+
+(defn draw-event-list
+  [screen events max-rows]
+  (let [filler (filler-sheet events)]
+    (s/put-sheet screen 0 0 (take-last max-rows filler))
+    (s/put-string screen 0 0 "Event log:")
+    (s/put-sheet screen 0 2 (take-last (- max-rows 2) events))))
+
+
+(defmethod draw-ui :event-list [_ui game screen]
+  (let [events (-> game :log :entries)
+        rows   (second (s/get-size screen))]
+    (draw-event-list screen events (/ rows 2))))
 
 
 (defn draw-game
