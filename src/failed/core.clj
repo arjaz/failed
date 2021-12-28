@@ -23,7 +23,7 @@
               :uis    [(->UI :start nil)]
               :input  nil
               :pause? nil
-              :hud    {:height 4}
+              :hud    {:height 2}
               :log    {:entries  []
                        :max-size 32}}))
 

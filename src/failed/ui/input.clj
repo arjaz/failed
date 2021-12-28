@@ -3,7 +3,7 @@
     [failed.entities.bunny :refer [make-bunny]]
     [failed.entities.lichen :refer [make-lichen]]
     [failed.entities.player :refer [make-player move-player]]
-    [failed.keymap :refer [read-keymap]]
+    [failed.keymap :refer [read-keymap with-help]]
     [failed.log :refer [with-log]]
     [failed.ui.core :refer [->UI]]
     [failed.world :refer [random-world find-empty-tile]]
@@ -36,11 +36,6 @@
         (add-creatures make-bunny 20))))
 
 
-(defn with-help
-  [help fn]
-  (vary-meta fn assoc :help help))
-
-
 (def play-keymap
   {:enter  (with-help "Win"
              ;; TODO: keymap
@@ -63,15 +58,19 @@
                    (update :uis conj (->UI :event-list nil))
                    (assoc :pause? true))))
    :up     (with-help "Move/attack/dig up"
+             ;; TODO: move logging inside
              (with-log "Moved north"
                (fn [game] (update game :world move-player :n))))
    :left   (with-help "Move/attack/dig left"
+             ;; TODO: move logging inside
              (with-log "Moved west"
                (fn [game] (update game :world move-player :w))))
    :right  (with-help "Move/attack/dig right"
+             ;; TODO: move logging inside
              (with-log "Moved east"
                (fn [game] (update game :world move-player :e))))
    :down   (with-help "Move/attack/dig down"
+             ;; TODO: move logging inside
              (with-log "Moved south"
                (fn [game] (update game :world move-player :s))))})
 

@@ -103,7 +103,7 @@
         log-row (- (second (s/get-size screen))
                    log-size)
         log-col 0]
-    #_(draw-log screen game log-row log-col log-size)))
+    (draw-log screen game log-row log-col log-size)))
 
 
 (defmethod draw-ui :play [_ui game screen]
@@ -150,10 +150,11 @@
 
 (defn draw-event-list
   [screen events max-rows]
-  (let [filler (filler-sheet events)]
-    (s/put-sheet screen 0 0 (take-last max-rows filler))
+  (let [events (take-last max-rows events)
+        filler (filler-sheet events)]
+    (s/put-sheet screen 0 0 filler)
     (s/put-string screen 0 0 "Event log:")
-    (s/put-sheet screen 0 2 (take-last (- max-rows 2) events))))
+    (s/put-sheet screen 0 1 (butlast events))))
 
 
 (defmethod draw-ui :event-list [_ui game screen]

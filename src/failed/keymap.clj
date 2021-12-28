@@ -10,6 +10,11 @@
   [keymap]
   (into {}
         (map
-          (fn [[key fn]]
-            [key (-> fn meta :help)]))
+          (fn [[key fun]]
+            [key (-> fun meta :help)]))
         keymap))
+
+
+(defn with-help
+  [help fn]
+  (vary-meta fn assoc :help help))
