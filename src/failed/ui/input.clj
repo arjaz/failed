@@ -3,9 +3,9 @@
     [failed.entities.bunny :refer [make-bunny]]
     [failed.entities.fungus :refer [make-fungus]]
     [failed.entities.player :refer [make-player move-player]]
-    [failed.keymap :refer [read-keymap with-help]]
-    [failed.log :refer [with-log]]
+    [failed.log :refer [log-event]]
     [failed.ui.core :refer [->UI]]
+    [failed.ui.keymap :refer [read-keymap]]
     [failed.world :refer [random-world find-empty-tile]]
     [lanterna.screen :as s]))
 
@@ -36,43 +36,96 @@
         (add-creatures make-bunny 20))))
 
 
+(defmacro defaction
+  [name help args & body]
+  `(do (defn ~name ~help ~args ~@body)
+       (def ~name (vary-meta ~name assoc :help ~help))))
+
+
+;; TODO: keymap
+(defaction win-screen-action
+  "Win"
+  [game]
+  (assoc game :uis [(->UI :win nil)]))
+
+
+;; TODO: keymap
+(defaction lose-screen-action
+  "Lose"
+  [game]
+  (assoc game :uis [(->UI :lose nil)]))
+
+
+(defaction quit-game-action
+  "Quit"
+  [game]
+  (assoc game :uis []))
+
+
+(defaction list-actions-action
+  "Available actions"
+  [game]
+  (-> game
+      ;; TODO: keymap
+      (update :uis conj (->UI :keymap-help nil))
+      (assoc :pause? true)))
+
+
+(defaction list-events-action
+  "Event log"
+  [game]
+  (-> game
+      ;; TODO: keymap
+      (update :uis conj (->UI :event-list nil))
+      (assoc :pause? true)))
+
+
+(defaction move-player-north-action
+  "Move/attack/dig up"
+  [game]
+  ;; TODO: move logging inside
+  (-> game
+      (update :world move-player :n)
+      (log-event "Moved north")))
+
+
+(defaction move-player-west-action
+  "Move/attack/dig left"
+  [game]
+  ;; TODO: move logging inside
+  (-> game
+      (update :world move-player :w)
+      (log-event "Moved west")))
+
+
+(defaction move-player-east-action
+  "Move/attack/dig right"
+  [game]
+  ;; TODO: move logging inside
+  (-> game
+      (update :world move-player :e)
+      (log-event "Moved east")))
+
+
+(defaction move-player-south-action
+  "Move/attack/dig down"
+  [game]
+  ;; TODO: move logging inside
+  (-> game
+      (update :world move-player :s)
+      (log-event "Moved south")))
+
+
 (def play-keymap
-  {:enter  (with-help "Win"
-             ;; TODO: keymap
-             (fn [game] (assoc game :uis [(->UI :win nil)])))
-   :escape (with-help "Lose"
-             ;; TODO: keymap
-             (fn [game] (assoc game :uis [(->UI :lose nil)])))
-   \q      (with-help "Quit"
-             (fn [game] (assoc game :uis [])))
-   \?      (with-help "Available actions"
-             (fn [game]
-               (-> game
-                   ;; TODO: keymap
-                   (update :uis conj (->UI :keymap-help nil))
-                   (assoc :pause? true))))
-   \a      (with-help "Event log"
-             (fn [game]
-               (-> game
-                   ;; TODO: keymap
-                   (update :uis conj (->UI :event-list nil))
-                   (assoc :pause? true))))
-   :up     (with-help "Move/attack/dig up"
-             ;; TODO: move logging inside
-             (with-log "Moved north"
-               (fn [game] (update game :world move-player :n))))
-   :left   (with-help "Move/attack/dig left"
-             ;; TODO: move logging inside
-             (with-log "Moved west"
-               (fn [game] (update game :world move-player :w))))
-   :right  (with-help "Move/attack/dig right"
-             ;; TODO: move logging inside
-             (with-log "Moved east"
-               (fn [game] (update game :world move-player :e))))
-   :down   (with-help "Move/attack/dig down"
-             ;; TODO: move logging inside
-             (with-log "Moved south"
-               (fn [game] (update game :world move-player :s))))})
+  {:enter  win-screen-action
+   :escape lose-screen-action
+   \q      quit-game-action
+   \?      list-actions-action
+   \a      list-events-action
+   :up     move-player-north-action
+   :left   move-player-west-action
+   :right  move-player-east-action
+   :down   move-player-south-action})
 
 
 (defn reset-game

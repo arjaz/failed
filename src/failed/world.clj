@@ -10,6 +10,7 @@
   [tiles entities])
 
 
+;; TODO: maybe add passable?
 (defrecord Tile
   [kind glyph color])
 

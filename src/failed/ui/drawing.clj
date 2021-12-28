@@ -1,6 +1,6 @@
 (ns failed.ui.drawing
   (:require
-    [failed.keymap :refer [keymap-help]]
+    [failed.ui.keymap :refer [keymap-help]]
     [failed.utils :refer [map2d shear]]
     [lanterna.screen :as s]))
 

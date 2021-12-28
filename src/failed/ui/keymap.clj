@@ -1,4 +1,4 @@
-(ns failed.keymap)
+(ns failed.ui.keymap)
 
 
 (defn read-keymap
@@ -13,8 +13,3 @@
           (fn [[key fun]]
             [key (-> fun meta :help)]))
         keymap))
-
-
-(defn with-help
-  [help fn]
-  (vary-meta fn assoc :help help))

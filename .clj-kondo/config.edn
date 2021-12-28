@@ -1,0 +1,1 @@
+{:lint-as {failed.ui.input/defaction clojure.core/defn}}
